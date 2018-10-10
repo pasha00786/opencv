@@ -1,3 +1,6 @@
+# Written by Ashutosh Gupta
+# Pyhton code to generate a funky frame over the human face using OpenCV with Haar Cascade approach.
+
 import numpy as np
 import cv2
 
@@ -21,7 +24,7 @@ while 1:
             cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
             roi_gray = gray[y:y+h, x:x+w]
             roi_color = img[y:y+h, x:x+w]
-            noses = nose_cascade.detectMultiScale(roi_gray)
+            noses = nose_cascade.detectMultiScale(roi_gray, 1.3, 5)
 
             nose = 0
             for (a, b, c, d) in noses:
