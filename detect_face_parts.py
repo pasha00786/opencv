@@ -6,11 +6,12 @@ import numpy as np
 import imutils
 import dlib
 import cv2
+from utilities import image_resize
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('./shape_predictor_68_face_landmarks.dat') #Loading the facial HOG Detector
 
-cap = cv2.VideoCapture(0) #Getting frames from webcam.
+#cap = cv2.VideoCapture(0) #Getting frames from webcam.
 
 #Instantiating facial index
 part_1 = 'right_eyebrow'
@@ -18,12 +19,17 @@ part_2 = 'left_eyebrow'
 part_3 = 'nose'
 part_4 = 'jaw'
 
+#Loding Filters
+t_filter = cv2.imread("t.png", -1)
+
 
 while 1:  #to continously stream the frames
-	_, image = cap.read()
-	#image = cv2.imread('me.jpg')
+	#_, image = cap.read()
+	image = cv2.imread('me.jpg')
 	image = imutils.resize(image, width=500)
-	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #Grayscaled image to have fast and efficient detection
+	#Adding alpha channel
+	image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+	gray = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY) #Grayscaled image to have fast and efficient detection
 	rects = detector(gray, 1)
 	for (i, rect) in enumerate(rects):
 		# determine the facial landmarks for the face region, then                 
@@ -47,16 +53,32 @@ while 1:  #to continously stream the frames
 		m, n = int((x+w+p)*0.5) , int((y+q)*0.5)
 		d = int(d*0.75)
 
-		#Overlapping ROI over the frame
-		cv2.line(image, (m, n), (m, n-d), (0,255,0), thickness=1, lineType=8, shift=0) #forehead
-		cv2.circle(image , (u, i + z), 10, (0, 0, 255), -1)  #right_shoulder
-		cv2.circle(image , (u + o, i + z), 10, (0, 255, 0), -1) #left_shoulder
+		# T-filter
+		tx = x+w
+		ty = q - d
+		tw = p-(x+w)
+		th = d
+		roi_t = gray[ty: ty + th, tx: tx + tw]
+		T_ = image_resize(t_filter.copy(), height = th)
+		Tw, Th, Tc = T_.shape
+		for i in range(0, Tw):
+			for j in range(0, Th):
+				if T_[i, j][3] != 0: # alpha 0
+						image[ty + i, tx + j] = T_[i, j]
 
-	#Outputting
-	cv2.imshow("Image", image)	
+
+		#Overlapping ROI over the frame
+		#cv2.rectangle(image, (tx, ty), (tx+tw, ty-th), (255, 255, 0), 1)
+		#cv2.line(image, (m, n), (m, n-d), (0,255,0), thickness=1, lineType=8, shift=0) #forehead
+		# cv2.circle(image , (u, i + 3*z), 10, (0, 0, 255), -1)  #right_shoulder
+		# cv2.circle(image , (u + o, i + 3*z), 10, (0, 255, 0), -1) #left_shoulder
+
+	image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)	
+	cv2.imshow('img',image)
+	#Outputting	
 	if cv2.waitKey(0) & 0xFF == ord('q'):
 		break
 
 #Vacating and destroying all instances
-cap.release()
+# cap.release()
 cv2.destroyAllWindows()
