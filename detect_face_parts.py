@@ -43,6 +43,9 @@ while 1:  #to continously stream the frames
 		(y,z) = face_utils.FACIAL_LANDMARKS_IDXS[part_3] #nose index
 		(k,e) = face_utils.FACIAL_LANDMARKS_IDXS[part_4] #jawline index
 
+		# for (x, y) in shape[k:e]:
+		# 	cv2.circle(image, (x, y), 1, (0, 0, 255), -1)
+
 		#Getting bounding boxes coords
 		(a, b, c, d) = cv2.boundingRect(np.array([shape[y:z]])) #nose coords
 		(x, y, w, h) = cv2.boundingRect(np.array([shape[i:j]])) #r-eyebrow coords
@@ -53,6 +56,12 @@ while 1:  #to continously stream the frames
 		m, n = int((x+w+p)*0.5) , int((y+q)*0.5)
 		d = int(d*0.75)
 
+		#Shoulder Coords
+		rs_x, rs_y = u, i+z
+		ls_x, ls_y = u + o, i+z
+		cv2.circle(image , (rs_x, rs_y), 5, (0, 255, 255), -1)  #right_shoulder
+		cv2.circle(image , (ls_x, ls_y), 5, (0, 255, 0), -1) #left_shoulder
+		
 		# T-filter
 		tx = x+w
 		ty = q - d
@@ -70,8 +79,8 @@ while 1:  #to continously stream the frames
 		#Overlapping ROI over the frame
 		#cv2.rectangle(image, (tx, ty), (tx+tw, ty-th), (255, 255, 0), 1)
 		#cv2.line(image, (m, n), (m, n-d), (0,255,0), thickness=1, lineType=8, shift=0) #forehead
-		# cv2.circle(image , (u, i + 3*z), 10, (0, 0, 255), -1)  #right_shoulder
-		# cv2.circle(image , (u + o, i + 3*z), 10, (0, 255, 0), -1) #left_shoulder
+		
+		# cv2.rectangle(image, (u, i), (u+o, i+z), (255, 255, 0), 1)
 
 	image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)	
 	cv2.imshow('img',image)
