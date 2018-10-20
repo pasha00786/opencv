@@ -2,6 +2,8 @@ import cv2
 import os
 
 # source: https://stackoverflow.com/a/44659589
+# Modified by Ashutosh Gupta
+
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
     # grab the image size
@@ -22,7 +24,7 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
         # calculate the ratio of the width and construct the
         # dimensions
         r = width / float(w)
-        dim = (width, int(h * r))
+        dim = (width, height)
 
     # resize the image
     resized = cv2.resize(image, dim, interpolation = inter)

@@ -7,6 +7,7 @@ import imutils
 import dlib
 import cv2
 from utilities import image_resize
+import matplotlib.pyplot as plt
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('./shape_predictor_68_face_landmarks.dat') #Loading the facial HOG Detector
@@ -21,16 +22,19 @@ part_4 = 'jaw'
 
 #Loding Filters
 t_filter = cv2.imread("t.png", -1)
+g_filter = cv2.imread("g.png", -1)
 
 
 while 1:  #to continously stream the frames
 	#_, image = cap.read()
-	image = cv2.imread('me.jpg')
+	image = cv2.imread('ashu.jpg')
 	image = imutils.resize(image, width=500)
 	#Adding alpha channel
 	image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
 	gray = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY) #Grayscaled image to have fast and efficient detection
 	rects = detector(gray, 1)
+	# print(gray.shape)
+	Y, X = gray.shape
 	for (i, rect) in enumerate(rects):
 		# determine the facial landmarks for the face region, then                 
 		shape = predictor(gray, rect)
@@ -60,8 +64,9 @@ while 1:  #to continously stream the frames
 		rs_x, rs_y = u, i+z
 		ls_x, ls_y = u + o, i+z
 		cv2.circle(image , (rs_x, rs_y), 5, (0, 255, 255), -1)  #right_shoulder
-		cv2.circle(image , (ls_x, ls_y), 5, (0, 255, 0), -1) #left_shoulder
-		
+		#cv2.circle(image , (ls_x, ls_y), 5, (0, 255, 0), -1) #left_shoulder
+		cv2.circle(image , (Y, X), 5, (0, 255, 0), -1)
+
 		# T-filter
 		tx = x+w
 		ty = q - d
@@ -75,7 +80,27 @@ while 1:  #to continously stream the frames
 				if T_[i, j][3] != 0: # alpha 0
 						image[ty + i, tx + j] = T_[i, j]
 
+		# G-filter
 
+		#Left
+		glx = ls_x - int(0.12*ls_x)
+		gly = ls_y
+		glw = w + int(0.12*ls_x)
+		glh = Y - ls_y
+		
+		roi_g = gray[gly: gly + glh, glx: glx + glw]
+		G_ = image_resize(g_filter.copy(), width = glw, height = glh)
+		Gw, Gh, Gc = G_.shape
+		for i in range(0, Gw):
+			for j in range(0, Gh):
+				if G_[i, j][3] != 0: # alpha 0
+						image[gly + i, glx + j] = G_[i, j]
+
+
+		#right
+
+		#cv2.rectangle(image, (glx, gly), (glx + glw, gly + glh), (255, 255, 0), 1)
+		#cv2.rectangle(image, (rs_x + int(0.12*rs_x), rs_y), (rs_x - int(1.3*w), Y), (255, 255, 0), 1)
 		#Overlapping ROI over the frame
 		#cv2.rectangle(image, (tx, ty), (tx+tw, ty-th), (255, 255, 0), 1)
 		#cv2.line(image, (m, n), (m, n-d), (0,255,0), thickness=1, lineType=8, shift=0) #forehead

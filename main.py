@@ -3,11 +3,6 @@
 
 import numpy as np
 import cv2
-<html>
-<body>
-<h1>ashu pglet</h1>
-</body>
-</html>
 #face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 #eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
